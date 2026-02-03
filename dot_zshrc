@@ -127,6 +127,8 @@ export PATH="$HOME/.local/bin:$PATH"
 
 alias lg='lazygit'
 alias cz='chezmoi'
+alias vim='nvim'
+alias czea='chezmoi edit --apply'
 
 
 eval "$(starship init zsh)"
@@ -150,3 +152,6 @@ fi
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+export EDITOR=nvim
+export VISUAL=nvim
