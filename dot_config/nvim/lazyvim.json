@@ -1,6 +1,7 @@
 {
   "extras": [
     "lazyvim.plugins.extras.ai.claudecode",
+    "lazyvim.plugins.extras.ai.codeium",
     "lazyvim.plugins.extras.coding.mini-surround",
     "lazyvim.plugins.extras.editor.inc-rename",
     "lazyvim.plugins.extras.editor.outline",
@@ -13,8 +14,7 @@
     "lazyvim.plugins.extras.lang.toml",
     "lazyvim.plugins.extras.lang.yaml",
     "lazyvim.plugins.extras.test.core",
-    "lazyvim.plugins.extras.ui.treesitter-context",
-    "lazyvim.plugins.extras.util.rest"
+    "lazyvim.plugins.extras.ui.treesitter-context"
   ],
   "install_version": 8,
   "news": {

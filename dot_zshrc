@@ -126,6 +126,7 @@ source ~/fzf.zsh
 export PATH="$HOME/.local/bin:$PATH"
 
 alias lg='lazygit'
+alias ld='lazydocker'
 alias cz='chezmoi'
 alias vim='nvim'
 alias czea='chezmoi edit --apply'
@@ -142,8 +143,13 @@ esac
 # pnpm end
 
 # 如果不是在 tmux 里，且当前是交互式 Shell，则尝试进入 tmux
+# 第一个终端进 default session（持久化），后续终端用临时独立 session
 if [[ -z "$TMUX" && $- == *i* ]]; then
-    exec tmux new-session -A -s default
+    if tmux has-session -t default 2>/dev/null; then
+        exec tmux new-session -s "term-$$" \; set destroy-unattached on
+    else
+        exec tmux new-session -s default
+    fi
 fi
 
 # bun completions
@@ -155,3 +161,4 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 export EDITOR=nvim
 export VISUAL=nvim
+export PATH="$HOME/.npm-global/bin:$PATH"
