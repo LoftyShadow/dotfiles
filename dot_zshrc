@@ -130,6 +130,7 @@ alias ld='lazydocker'
 alias cz='chezmoi'
 alias vim='nvim'
 alias czea='chezmoi edit --apply'
+alias cpwd='pwd | wl-copy'
 
 
 eval "$(starship init zsh)"

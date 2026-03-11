@@ -68,7 +68,7 @@ scrollback-limit = 100000
 # Ghostty 内置了大量主题，可以用 ghostty +list-themes 查看
 theme = Catppuccin Frappe
 background-opacity = 0.86
-background-blur-radius = 24
+# background-blur-radius = 24  # 暂时禁用：与 custom-shader 组合在 niri 下导致渲染失败
 minimum-contrast = 1.1
 
 # --- 窗口样式 ---
@@ -82,13 +82,21 @@ window-padding-y = 6
 cursor-style = block
 cursor-style-blink = true
 mouse-hide-while-typing = true
-shell-integration-features = no-cursor
+# shell-integration-features = no-cursor  # 与 custom-shader 冲突，着色器需要光标位置信息
 
 # --- 其他优化 ---
 # 复制到系统剪贴板
 copy-on-select = true
 confirm-close-surface = false
 
-# --- 光标移动动画（custom-shader）---
+# 多窗口独立运行（解决 shader 多窗口渲染问题）
+gtk-single-instance = false
+
+# --- 光标移动动画 ---
+# 使用内置动画（兼容 niri/Wayland）
+cursor-style-blink = true
+
+# Neovide 风格光标拖尾特效（Wayland 下可能有性能或渲染问题）
 custom-shader = /home/niemingzhi/.config/ghostty/shaders/cursor-motion.glsl
 custom-shader-animation = true
+
