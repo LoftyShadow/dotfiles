@@ -128,9 +128,14 @@ export PATH="$HOME/.local/bin:$PATH"
 alias lg='lazygit'
 alias ld='lazydocker'
 alias cz='chezmoi'
-alias vim='nvim'
 alias czea='chezmoi edit --apply'
+alias vim='nvim'
 alias cpwd='pwd | wl-copy'
+alias busy='~/Documents/genact'
+alias cc='claude'
+alias cx='codex'
+alias cxc='codex resume --last'
+alias op='opencode'
 
 
 eval "$(starship init zsh)"
@@ -153,13 +158,18 @@ if [[ -z "$TMUX" && $- == *i* ]]; then
     fi
 fi
 
-# bun completions
-[ -s "/home/niemingzhi/.bun/_bun" ] && source "/home/niemingzhi/.bun/_bun"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
 
 export EDITOR=nvim
 export VISUAL=nvim
 export PATH="$HOME/.npm-global/bin:$PATH"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# OpenClaw Completion
+source "/home/niemingzhi/.openclaw/completions/openclaw.zsh"
+
+# bun completions
+[ -s "/home/niemingzhi/.bun/_bun" ] && source "/home/niemingzhi/.bun/_bun"
+export PATH="$HOME/.bun/bin:$PATH"
