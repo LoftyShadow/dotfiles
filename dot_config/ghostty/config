@@ -92,6 +92,14 @@ confirm-close-surface = false
 # 多窗口独立运行（解决 shader 多窗口渲染问题）
 gtk-single-instance = false
 
+# --- Quick Terminal ---
+# 保留应用内唤起，不再占用 F12 全局热键
+keybind = ctrl+shift+space=toggle_quick_terminal
+quick-terminal-position = bottom
+quick-terminal-size = 34%
+gtk-quick-terminal-layer = overlay
+quick-terminal-autohide = true
+
 # --- 光标移动动画 ---
 # 使用内置动画（兼容 niri/Wayland）
 cursor-style-blink = true
@@ -99,4 +107,3 @@ cursor-style-blink = true
 # Neovide 风格光标拖尾特效（Wayland 下可能有性能或渲染问题）
 custom-shader = /home/niemingzhi/.config/ghostty/shaders/cursor-motion.glsl
 custom-shader-animation = true
-

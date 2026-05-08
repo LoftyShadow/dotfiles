@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage:
+  ncs <dir> [session-name]
+
+Behavior:
+  - Create or attach to a tmux session rooted at <dir>
+  - Layout:
+      top left:  nvim
+      top right: codex
+      bottom:    shell
+EOF
+}
+
+if [[ "${1-}" == "-h" || "${1-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+if [[ $# -lt 1 ]]; then
+  usage
+  exit 1
+fi
+
+target_dir="${1}"
+if [[ ! -d "${target_dir}" ]]; then
+  echo "Directory not found: ${target_dir}" >&2
+  exit 1
+fi
+
+target_dir="$(cd "${target_dir}" && pwd)"
+session_name="${2-$(basename "${target_dir}" | tr ' .:/' '_' )}"
+
+if tmux has-session -t "${session_name}" 2>/dev/null; then
+  if [[ -n "${TMUX-}" ]]; then
+    exec tmux switch-client -t "${session_name}"
+  fi
+  exec tmux attach-session -t "${session_name}"
+fi
+
+tmux new-session -d -s "${session_name}" -c "${target_dir}" -n main
+tmux rename-window -t "${session_name}:main" work
+
+# Top-left pane: nvim
+tmux send-keys -t "${session_name}:work.0" 'nvim' C-m
+
+# Bottom pane: shell across the full width
+tmux split-window -v -t "${session_name}:work" -c "${target_dir}"
+
+# Top-right pane: codex
+tmux split-window -h -t "${session_name}:work" -c "${target_dir}"
+tmux send-keys -t "${session_name}:work.1" 'codex' C-m
+
+# Match the current codekata proportions:
+# total 177x42 -> top 34 rows, bottom 7 rows; top left 126 cols, top right 50 cols.
+tmux resize-pane -t "${session_name}:work.2" -y 7 >/dev/null 2>&1 || true
+tmux resize-pane -t "${session_name}:work.0" -x 126 >/dev/null 2>&1 || true
+tmux select-pane -t "${session_name}:work.0"
+
+if [[ -n "${TMUX-}" ]]; then
+  exec tmux switch-client -t "${session_name}"
+fi
+
+exec tmux attach-session -t "${session_name}"

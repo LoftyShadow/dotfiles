@@ -30,6 +30,23 @@ bindkey -v
 # Remove path separator from WORDCHARS.
 WORDCHARS=${WORDCHARS//[\/]}
 
+# Common environment
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export EDITOR=nvim
+export VISUAL=nvim
+
+typeset -U path PATH
+path=(
+  "$HOME/.local/bin"
+  "$HOME/.config/tmux/bin"
+  "$HOME/.local/share/pnpm"
+  "$HOME/.bun/bin"
+  "$HOME/.npm-global/bin"
+  $path
+)
+export PATH
+
 # --------------------
 # Module configuration
 # --------------------
@@ -118,12 +135,9 @@ function yz() {
 	rm -f -- "$tmp"
 }
 
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-
-source ~/fzf.zsh
-
-export PATH="$HOME/.local/bin:$PATH"
+if [[ $- == *i* && -z ${ZSH_EXECUTION_STRING-} && -s "$HOME/fzf.zsh" ]]; then
+  source "$HOME/fzf.zsh"
+fi
 
 alias lg='lazygit'
 alias ld='lazydocker'
@@ -131,10 +145,9 @@ alias cz='chezmoi'
 alias czea='chezmoi edit --apply'
 alias vim='nvim'
 alias cpwd='pwd | wl-copy'
-alias busy='~/Documents/genact'
 alias cc='claude'
-alias cx='codex'
 alias cxc='codex resume --last'
+alias cx='codex'
 alias op='opencode'
 
 
@@ -142,10 +155,6 @@ eval "$(starship init zsh)"
 
 # pnpm
 export PNPM_HOME="/home/niemingzhi/.local/share/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
 # pnpm end
 
 # 如果不是在 tmux 里，且当前是交互式 Shell，则尝试进入 tmux
@@ -158,11 +167,6 @@ if [[ -z "$TMUX" && $- == *i* ]]; then
     fi
 fi
 
-
-export EDITOR=nvim
-export VISUAL=nvim
-export PATH="$HOME/.npm-global/bin:$PATH"
-
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
@@ -172,4 +176,3 @@ source "/home/niemingzhi/.openclaw/completions/openclaw.zsh"
 
 # bun completions
 [ -s "/home/niemingzhi/.bun/_bun" ] && source "/home/niemingzhi/.bun/_bun"
-export PATH="$HOME/.bun/bin:$PATH"

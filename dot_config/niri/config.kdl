@@ -624,12 +624,14 @@ binds {
     // Mod+Space       { switch-layout "next"; }
     // Mod+Shift+Space { switch-layout "prev"; }
 
-    // 区域截图 → Satty 标注
-    Print { spawn-sh "grim -g \"$(slurp)\" - | satty -f -"; }
-    // 全屏截图 → Satty 标注
-    Ctrl+Print { spawn-sh "grim - | satty -f -"; }
-    // 窗口截图（保留 niri 原生）
-    Alt+Print { screenshot-window; }
+    // 区域截图 → Satty 标注，并显式保存到 Screenshots 目录
+    Print { spawn-sh "dir=\"$HOME/Pictures/Screenshots\"; mkdir -p \"$dir\"; tmp=\"$(mktemp --suffix .png)\"; grim -g \"$(slurp)\" \"$tmp\" && satty -f \"$tmp\" -o \"$dir/Screenshot from %Y-%m-%d %H-%M-%S.png\"; rm -f \"$tmp\""; }
+    // 全屏截图 → Satty 标注，并显式保存到 Screenshots 目录
+    Ctrl+Print { spawn-sh "dir=\"$HOME/Pictures/Screenshots\"; mkdir -p \"$dir\"; tmp=\"$(mktemp --suffix .png)\"; grim \"$tmp\" && satty -f \"$tmp\" -o \"$dir/Screenshot from %Y-%m-%d %H-%M-%S.png\"; rm -f \"$tmp\""; }
+    // 窗口截图（保留 niri 原生保存），随后自动交给 Satty 标注
+    Alt+Print {
+        spawn-sh "dir=\"$HOME/Pictures/Screenshots\"; before=\"$(find \"$dir\" -maxdepth 1 -type f -name 'Screenshot from *.png' -printf '%T@ %p\n' 2>/dev/null | sort -n | tail -n1 | cut -d' ' -f2-)\"; niri msg action screenshot-window; i=0; while [ $i -lt 30 ]; do latest=\"$(find \"$dir\" -maxdepth 1 -type f -name 'Screenshot from *.png' -printf '%T@ %p\n' 2>/dev/null | sort -n | tail -n1 | cut -d' ' -f2-)\"; if [ -n \"$latest\" ] && [ \"$latest\" != \"$before\" ]; then exec satty -f \"$latest\"; fi; i=$((i + 1)); sleep 0.1; done"
+    }
 
     // Applications such as remote-desktop clients and software KVM switches may
     // request that niri stops processing the keyboard shortcuts defined here
