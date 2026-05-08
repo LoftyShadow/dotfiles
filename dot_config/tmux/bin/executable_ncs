@@ -10,9 +10,8 @@ Usage:
 Behavior:
   - Create or attach to a tmux session rooted at <dir>
   - Layout:
-      top left:  nvim
-      top right: codex
-      bottom:    shell
+      left:  nvim
+      right: codex
 EOF
 }
 
@@ -45,19 +44,15 @@ fi
 tmux new-session -d -s "${session_name}" -c "${target_dir}" -n main
 tmux rename-window -t "${session_name}:main" work
 
-# Top-left pane: nvim
+# Left pane: nvim
 tmux send-keys -t "${session_name}:work.0" 'nvim' C-m
 
-# Bottom pane: shell across the full width
-tmux split-window -v -t "${session_name}:work" -c "${target_dir}"
-
-# Top-right pane: codex
+# Right pane: codex
 tmux split-window -h -t "${session_name}:work" -c "${target_dir}"
 tmux send-keys -t "${session_name}:work.1" 'codex' C-m
 
 # Match the current codekata proportions:
-# total 177x42 -> top 34 rows, bottom 7 rows; top left 126 cols, top right 50 cols.
-tmux resize-pane -t "${session_name}:work.2" -y 7 >/dev/null 2>&1 || true
+# total 177x42 -> left 126 cols, right 50 cols.
 tmux resize-pane -t "${session_name}:work.0" -x 126 >/dev/null 2>&1 || true
 tmux select-pane -t "${session_name}:work.0"
 
