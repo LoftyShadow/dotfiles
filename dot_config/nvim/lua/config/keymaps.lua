@@ -28,6 +28,26 @@ keymap.set("n", "<leader>p", "o<ESC>p")
 keymap.set({ "n", "v" }, "gh", "^")
 keymap.set({ "n", "v" }, "gl", "$")
 
+local function copy_file_location()
+  local filepath = vim.fn.expand("%:p")
+  local start_line = vim.fn.line("v")
+  local end_line = vim.fn.line(".")
+
+  if vim.fn.mode():match("[vV\22]") then
+    if start_line > end_line then
+      start_line, end_line = end_line, start_line
+    end
+    vim.fn.setreg("+", string.format("%s:%d-%d", filepath, start_line, end_line))
+  else
+    vim.fn.setreg("+", string.format("%s:%d", filepath, end_line))
+  end
+
+  vim.notify("Copied file location to clipboard")
+end
+
+-- 复制当前文件路径和行号，方便发给 AI
+keymap.set({ "n", "v" }, "<leader>yf", copy_file_location, { desc = "Copy file location" })
+
 --  保存
 keymap.set({ "n", "i" }, "<C-s>", "<Esc>:w<cr>")
 
