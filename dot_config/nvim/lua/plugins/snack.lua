@@ -1,6 +1,13 @@
 return {
   "folke/snacks.nvim",
   opts = {
+    picker = {
+      sources = {
+        explorer = {
+          include = { ".env", ".env.*" },
+        },
+      },
+    },
     terminal = {
       win = {
         style = "float", -- 强制使用浮动样式

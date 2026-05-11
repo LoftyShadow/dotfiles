@@ -9,3 +9,7 @@
 -- vim.opt.shellcmdflag = "-c"
 -- vim.opt.shellquote = ""
 -- vim.opt.shellxquote = ""
+
+-- Match Ghostty background-opacity = 0.86.
+vim.opt.winblend = 14
+vim.opt.pumblend = 14

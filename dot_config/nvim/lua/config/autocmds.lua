@@ -6,28 +6,47 @@
 --
 -- Or remove existing autocmds by their group name (which is prefixed with `lazyvim_` for the defaults)
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
+local user_autocmds = vim.api.nvim_create_augroup("user_autocmds", { clear = true })
+
 -- 关闭新行注释：
 vim.api.nvim_create_autocmd({ "BufEnter" }, {
+  group = user_autocmds,
   pattern = "*",
   callback = function()
-    vim.opt.formatoptions = vim.opt.formatoptions - { "c", "r", "o" }
+    vim.opt_local.formatoptions:remove({ "c", "r", "o" })
   end,
 })
--- 当你要保存文件之前，Neovim 会执行这里的检查
-vim.api.nvim_create_autocmd("BufWritePre", {
-  pattern = { ".env", ".env.*", "*.example" }, -- 匹配所有 .env 开头或 example 结尾的文件
+-- 这些文件通常包含环境变量或示例配置，不走保存时格式化。
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  group = user_autocmds,
+  pattern = { ".env", ".env.*" },
   callback = function()
     -- 直接给当前这个文件打个“禁止格式化”的标签
     vim.b.autoformat = false
-    -- 强制让负责格式化的插件跳过这个文件
-    vim.g.autoformat = false
   end,
 })
 
--- 为了不影响其他文件，保存完后再把全局开关打开（可选）
-vim.api.nvim_create_autocmd("BufWritePost", {
-  pattern = { ".env", ".env.*", "*.example" },
-  callback = function()
-    vim.g.autoformat = true
-  end,
+local function sync_transparent_background()
+  local transparent_groups = {
+    "Normal",
+    "NormalNC",
+    "SignColumn",
+    "EndOfBuffer",
+    "LineNr",
+    "CursorLineNr",
+  }
+
+  for _, group in ipairs(transparent_groups) do
+    local hl = vim.api.nvim_get_hl(0, { name = group, link = false })
+    hl.bg = "NONE"
+    vim.api.nvim_set_hl(0, group, hl)
+  end
+end
+
+sync_transparent_background()
+
+vim.api.nvim_create_autocmd("ColorScheme", {
+  group = user_autocmds,
+  pattern = "*",
+  callback = sync_transparent_background,
 })

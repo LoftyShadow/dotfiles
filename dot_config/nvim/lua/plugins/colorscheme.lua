@@ -5,6 +5,11 @@ return {
     priority = 1000,
     opts = {
       transparent_background = true,
+      integrations = {
+        telescope = true,
+        which_key = true,
+        snacks = true,
+      },
     },
     specs = {
       {

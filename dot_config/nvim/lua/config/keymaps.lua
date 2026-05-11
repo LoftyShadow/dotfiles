@@ -16,8 +16,6 @@ keymap.set("i", "jk", "<ESC>")
 keymap.set("v", "x", "_x")
 -- p 替换为P用来保留粘贴板
 keymap.set("v", "p", "P")
-keymap.set("v", "J", "^")
-keymap.set("v", "K", "$")
 
 -- ---------- 正常模式 ---------- ---
 -- 全选
@@ -26,9 +24,9 @@ keymap.set("n", "vae", "ggVG")
 keymap.set("n", "<leader>nh", ":nohl<CR>")
 -- 复制到下一行
 keymap.set("n", "<leader>p", "o<ESC>p")
--- 移动到当前行首位置
-keymap.set("n", "J", "^")
-keymap.set("n", "K", "$")
+-- 移动到当前行首/行尾，保留 J 的默认合并行行为
+keymap.set({ "n", "v" }, "gh", "^")
+keymap.set({ "n", "v" }, "gl", "$")
 
 --  保存
 keymap.set({ "n", "i" }, "<C-s>", "<Esc>:w<cr>")
