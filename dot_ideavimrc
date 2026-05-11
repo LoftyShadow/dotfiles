@@ -115,8 +115,8 @@ map zo <Action>(ExpandRegion)
 map zC <Action>(CollapseAllRegions)
 map zO <Action>(ExpandAllRegions)
 
-map J ^
-map K $
+map gh ^
+map gl $
 vmap o f)
 vmap u F(
 "mark未修复单独设置

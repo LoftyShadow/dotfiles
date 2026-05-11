@@ -66,7 +66,7 @@ scrollback-limit = 100000
 
 # --- 主题与透明度 ---
 # Ghostty 内置了大量主题，可以用 ghostty +list-themes 查看
-theme = noctalia
+theme = "Catppuccin Mocha"
 background-opacity = 0.86
 # background-blur-radius = 24  # 暂时禁用：与 custom-shader 组合在 niri 下导致渲染失败
 minimum-contrast = 1.1
