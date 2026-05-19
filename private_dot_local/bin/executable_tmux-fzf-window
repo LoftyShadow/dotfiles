@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v fzf >/dev/null 2>&1; then
+  printf 'tmux-fzf-window: fzf is not installed or not in PATH\n' >&2
+  exit 1
+fi
+
+selected="$(
+  tmux list-windows -a -F '#{session_name}:#{window_index}	#{?window_active,*, } #{session_name}:#{window_index}  #{window_name}  #{pane_current_path}' |
+    fzf \
+      --ansi \
+      --delimiter=$'\t' \
+      --with-nth=2.. \
+      --prompt='window> ' \
+      --height=100% \
+      --layout=reverse \
+      --border=none
+)"
+
+target="${selected%%$'\t'*}"
+
+if [[ -n "${target:-}" ]]; then
+  tmux switch-client -t "$target"
+fi

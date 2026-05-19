@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+session_id_from_args() {
+  local arg
+  for arg in "$@"; do
+    if [[ "$arg" =~ ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ ]]; then
+      printf '%s\n' "$arg"
+      return 0
+    fi
+  done
+  return 1
+}
+
+session_id_from_cwd() {
+  local cwd="${1:-$PWD}"
+  local session_file first_line id meta_cwd
+
+  while IFS= read -r session_file; do
+    [[ -n "$session_file" && -f "$session_file" ]] || continue
+    first_line="$(head -n 1 "$session_file" 2>/dev/null || true)"
+    [[ -n "$first_line" ]] || continue
+
+    if command -v jq >/dev/null 2>&1; then
+      meta_cwd="$(printf '%s\n' "$first_line" | jq -r 'select(.type == "session_meta") | .payload.cwd // empty' 2>/dev/null || true)"
+      [[ "$meta_cwd" == "$cwd" ]] || continue
+      id="$(printf '%s\n' "$first_line" | jq -r '.payload.id // empty' 2>/dev/null || true)"
+    else
+      [[ "$first_line" == *"\"cwd\":\"$cwd\""* ]] || continue
+      id="$(basename "$session_file" .jsonl | sed -E 's/^.*-([0-9a-fA-F-]{36})$/\1/')"
+    fi
+
+    if [[ "$id" =~ ^[0-9a-fA-F-]{36}$ ]]; then
+      printf '%s\n' "$id"
+      return 0
+    fi
+  done < <(find "$HOME/.codex/sessions" -type f -name '*.jsonl' -printf '%T@ %p\n' 2>/dev/null | sort -nr | cut -d' ' -f2-)
+
+  return 1
+}
+
+main() {
+  local id=""
+  local dry_run="0"
+
+  if [[ "${1:-}" == "--dry-run" ]]; then
+    dry_run="1"
+    shift
+  fi
+
+  if id="$(session_id_from_args "$@")"; then
+    echo "codex-resurrect: resuming saved Codex session $id"
+    if [[ "$dry_run" == "1" ]]; then
+      printf 'codex resume %q\n' "$id"
+      return 0
+    fi
+    exec codex resume "$id"
+  fi
+
+  if id="$(session_id_from_cwd "$PWD")"; then
+    echo "codex-resurrect: resuming latest Codex session for $PWD: $id"
+    if [[ "$dry_run" == "1" ]]; then
+      printf 'codex resume %q\n' "$id"
+      return 0
+    fi
+    exec codex resume "$id"
+  fi
+
+  echo "codex-resurrect: no Codex session found for $PWD; leaving pane as shell"
+}
+
+main "$@"
