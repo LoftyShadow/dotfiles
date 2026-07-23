@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+# Claude Code notifier - shows tmux window name in macOS notification
+# Usage: claude-notify <payload-json> [title]
+# 只负责发通知，不修改 tmux 状态（状态由 codex-tmux-status 在 hook 里单独设置）
+
+payload="${1-{}}"
+title="${2-已完成}"
+
+# 获取当前 tmux 窗口名
+window_name=""
+if [[ -n "${TMUX_PANE-}" ]] && command -v tmux >/dev/null 2>&1; then
+  window_name=$(tmux display-message -p -t "$TMUX_PANE" '#{window_name}' 2>/dev/null || true)
+fi
+
+# 如果没有 tmux 窗口名，使用默认值
+if [[ -z "$window_name" ]]; then
+  window_name="Claude Code"
+fi
+
+summary=""
+if command -v jq >/dev/null 2>&1; then
+  summary="$(printf '%s' "$payload" | jq -r '
+    .["last-assistant-message"] // "任务已完成" |
+    if type == "string" then . else "任务已完成" end |
+    gsub("[[:space:]]+"; " ") | .[0:180]
+  ' 2>/dev/null || true)"
+fi
+
+if [[ -z "$summary" ]]; then
+  summary="任务已完成"
+fi
+
+# 使用 tmux 窗口名作为副标题发送通知
+/usr/bin/osascript - "$summary" "$window_name" "$title" >/dev/null 2>&1 <<'APPLESCRIPT' || true
+on run argv
+  display notification (item 1 of argv) with title (item 3 of argv) subtitle (item 2 of argv) sound name "Glass"
+end run
+APPLESCRIPT
+
+exit 0
