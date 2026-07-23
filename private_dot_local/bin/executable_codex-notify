@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+# Codex appends one JSON payload argument to the configured notify command.
+# The Computer Use notifier invokes this through --previous-notify. Use the
+# macOS notification API directly, then update the originating tmux window.
+
+payload="${1-{}}"
+
+prompt=""
+summary=""
+if command -v jq >/dev/null 2>&1; then
+  prompt="$(printf '%s' "$payload" | jq -r '
+    .["input-messages"] // [] |
+    if type == "array" then
+      map(if type == "string" then . elif type == "object" then (.text // .content // empty) else empty end) |
+      map(select(type == "string")) | join(" ")
+    elif type == "string" then .
+    else ""
+    end |
+    gsub("[[:space:]]+"; " ") | .[0:28]
+  ' 2>/dev/null || true)"
+
+  summary="$(printf '%s' "$payload" | jq -r '
+    .["last-assistant-message"] // "任务已完成" |
+    if type == "string" then . else "任务已完成" end |
+    gsub("[[:space:]]+"; " ") | .[0:180]
+  ' 2>/dev/null || true)"
+fi
+
+if [[ -z "$prompt" ]]; then
+  prompt="Codex"
+fi
+if [[ -z "$summary" ]]; then
+  summary="任务已完成"
+fi
+
+# Pass text as argv so model output is never interpreted as AppleScript source.
+/usr/bin/osascript - "$summary" "$prompt" >/dev/null 2>&1 <<'APPLESCRIPT' || true
+on run argv
+  display notification (item 1 of argv) with title "Codex 已完成" subtitle (item 2 of argv) sound name "Glass"
+end run
+APPLESCRIPT
+
+if [[ -z "${TMUX_PANE-}" ]] || ! command -v tmux >/dev/null 2>&1; then
+  exit 0
+fi
+
+# A stale pane id can remain in inherited environments, so verify the target.
+if ! tmux display-message -p -t "$TMUX_PANE" '#{window_id}' >/dev/null 2>&1; then
+  exit 0
+fi
+
+"$HOME/.local/bin/codex-tmux-status" complete >/dev/null 2>&1 || true
+
+exit 0

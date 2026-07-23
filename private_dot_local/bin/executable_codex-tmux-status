@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+set -u
+
+case "${1-}" in
+  loading) label="… loading" ;;
+  complete) label="✓ 完成" ;;
+  clear) label="" ;;
+  *) exit 2 ;;
+esac
+
+if [[ -z "${TMUX_PANE-}" ]] || ! command -v tmux >/dev/null 2>&1; then
+  exit 0
+fi
+
+# A stale pane id can remain in inherited environments, so verify the target.
+if ! tmux display-message -p -t "$TMUX_PANE" '#{window_id}' >/dev/null 2>&1; then
+  exit 0
+fi
+
+tmux set-window-option -t "$TMUX_PANE" @codex_status "$label" >/dev/null 2>&1 || true
+tmux refresh-client -S >/dev/null 2>&1 || true
+
+exit 0

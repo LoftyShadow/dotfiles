@@ -7,6 +7,8 @@ set -g history-limit 50000
 # 开启鼠标支持（方便你用鼠标调整分屏大小）
 set -g mouse on
 set -g focus-events on
+# 不接受程序通过转义序列覆盖手工/hook 设置的 window 名称
+set -g allow-rename off
 # 当销毁会话时，优先切到上一个 session
 set -g detach-on-destroy previous
 # 开启窗口编号自动重新排序
@@ -18,8 +20,11 @@ setw -g mode-keys vi
 # 类似 vim 的选中文本
 bind-key -T copy-mode-vi v send-keys -X begin-selection
 # 类似 vim 的复制文本到剪贴板
-# bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "xclip -selection clipboard -i"
+{{ if eq .chezmoi.os "darwin" }}
+bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "pbcopy"
+{{ else }}
 bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "wl-copy"
+{{ end }}
 
 # 修改前缀键为 Ctrl+a
 set -g prefix C-a
@@ -87,8 +92,8 @@ set -g status-right '#[fg=#a0a9cb,bg=#45475A]  %m-%d   %H:%M '
 
 # 让不同 window 的区分更明显，但保持整体风格克制
 set -g window-status-separator " "
-set -g window-status-format '#[fg=#a3aed2,bg=#45475A] #I #[fg=#e3e5e5,bg=#45475A]#W '
-set -g window-status-current-format '#[fg=#769FF0,bg=#45475A]#[fg=#090c0c,bold,bg=#769FF0] #I #[fg=#1d2230,bold,bg=#769FF0]#W #[fg=#769FF0,bg=#45475A]'
+set -g window-status-format '#[fg=#a3aed2,bg=#45475A] #I #[fg=#e3e5e5,bg=#45475A]#W#{?@codex_status, · #{@codex_status},} '
+set -g window-status-current-format '#[fg=#769FF0,bg=#45475A]#[fg=#090c0c,bold,bg=#769FF0] #I #[fg=#1d2230,bold,bg=#769FF0]#W#{?@codex_status, · #{@codex_status},} #[fg=#769FF0,bg=#45475A]'
 set -g window-status-activity-style 'fg=#a0a9cb,bg=#45475A,bold'
 set -g window-status-bell-style 'fg=colour255,bg=colour124,bold'
 setw -g monitor-activity on
@@ -121,5 +126,5 @@ set -g @continuum-restore 'on'                 # 启动 tmux 时自动执行 res
 set -g @continuum-save-interval '15'           # 每 15 分钟自动保存一次
 set -g @plugin 'tmux-plugins/tmux-yank'        # 更完美地处理系统剪贴板，尤其是支持鼠标选中的瞬间自动复制。
 
-# 初始化 TPM (必须在最后)
-run '~/.tmux/plugins/tpm/tpm'
+# 初始化 TPM (必须在最后)；新机器尚未安装时不要让配置重载报错
+if-shell 'test -x "$HOME/.tmux/plugins/tpm/tpm"' 'run-shell "$HOME/.tmux/plugins/tpm/tpm"'
